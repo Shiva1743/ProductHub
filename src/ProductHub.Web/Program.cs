@@ -16,7 +16,6 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>();
 
 
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -44,6 +43,7 @@ app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
+    //pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 //NEW: ... MapStaticAssets, MapControllerRoute same ...
