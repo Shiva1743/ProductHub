@@ -1,0 +1,94 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ProductHub.Web.Data;
+using ProductHub.Web.Models;
+
+namespace ProductHub.Web.Controllers
+{
+    public class CategoriesController : Controller
+    {
+        private readonly AppDbContext _db;
+
+        public CategoriesController(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<IActionResult> Index(int id)
+        {
+            ViewBag.FormType = "Create";
+            ViewBag.category = null;
+
+            var category_list = await _db.Categories.ToListAsync();
+
+            return View(category_list);
+        }
+        public async Task<IActionResult> Edit(int id)
+        {
+            var category_list = await _db.Categories.ToListAsync();
+            var category = await _db.Categories.FindAsync(id);
+            ViewBag.FormType = "Edit";
+            ViewBag.category = category;
+            
+            return View("Index", category_list);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Category category)
+        {
+            var iscategoryExist = await _db.Categories.FindAsync(category.id);
+            if (iscategoryExist == null)
+            {
+                return NotFound();
+            }
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Category name is required.";
+                return RedirectToAction(nameof(Index));
+            }
+            iscategoryExist.name = category.name.Trim();
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = "Category updated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Create([Bind("name")]Category category)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Category name is required (max 100 characters).";
+                return RedirectToAction(nameof(Index));
+            }
+            var cname = category.name.Trim();
+            if (await _db.Categories.AnyAsync(c => c.name == cname))
+            {
+                TempData["Error"] = "Category already Exists.";
+                return RedirectToAction(nameof(Index));
+            }
+            _db.Categories.Add(category);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Category added.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category =  await _db.Categories.FindAsync(id);
+            if(category == null) return NotFound();
+
+            if (await _db.Products.AnyAsync(p => p.categoryId == id))
+            {
+                TempData["Error"] = "Cannot delete a category that still has products.";
+                return RedirectToAction(nameof(Index));
+            }
+            _db.Categories.Remove(category);
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = "Category deleted.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}

@@ -1,0 +1,52 @@
+﻿@model List<Category>
+@{
+    ViewData["Title"] = "Categories";
+    var formtype = ViewBag.FormType.ToString() ?? "Create";
+    var categoryData = ViewBag.Category as Category;
+}
+
+<h1 class="h3">Categories</h1>
+
+<form asp-action="@(formtype == "Create" ? "Create" : "Edit")" asp-route-id="@(categoryData?.id)" method="post" class="row g-2 mb-4">
+    <div class="col-8">
+        <input name ="Name" value="@(categoryData?.name ?? "")" class="form-control" placeholder="New category" maxlength="100"  />
+        <span class="text-danger">
+            @Html.ValidationMessage("name")
+        </span>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">@(formtype == "Create" ? "Add" : "Update")</button>
+    </div>
+</form>
+<hr />
+<div class="container">
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No Data Found</div>
+    }
+    else
+    {
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.name</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@c.id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form onsubmit="return confirm(' Are you sure ? You want to delete?? ');" asp-action="Delete" asp-route-id="@c.id" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" >Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
