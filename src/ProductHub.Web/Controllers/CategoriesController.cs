@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProductHub.Web.Data;
 using ProductHub.Web.Models;
+using System.Drawing.Printing;
 
 namespace ProductHub.Web.Controllers
 {
@@ -13,28 +14,50 @@ namespace ProductHub.Web.Controllers
         {
             _db = db;
         }
-
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Index(int page = 1)
         {
+            int pageSize = 5;
+            int totalCategory = await _db.Categories.CountAsync();
+            int totalPage = (int)Math.Ceiling(totalCategory / (double)pageSize);
+
+            page = totalPage > 0 ? Math.Min(page, totalPage) : 1;
+
+            var category_list = await _db.Categories
+                .OrderBy(c => c.id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             ViewBag.FormType = "Create";
             ViewBag.category = null;
-
-            var category_list = await _db.Categories.ToListAsync();
-
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPage = totalPage;
             return View(category_list);
         }
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, int page = 1)
         {
-            var category_list = await _db.Categories.ToListAsync();
+            int pageSize = 5;
             var category = await _db.Categories.FindAsync(id);
+            if (category == null)
+                return NotFound();
+
+            int totalCategory = await _db.Categories.CountAsync();
+            int totalPage = (int)Math.Ceiling(totalCategory / (double)pageSize);
+            var category_list = await _db.Categories
+                .OrderBy(c => c.id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
             ViewBag.FormType = "Edit";
             ViewBag.category = category;
-            
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPage = totalPage;
+
             return View("Index", category_list);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Category category)
+        public async Task<IActionResult> Edit(Category category, int page = 1)
         {
             var iscategoryExist = await _db.Categories.FindAsync(category.id);
             if (iscategoryExist == null)
@@ -50,7 +73,7 @@ namespace ProductHub.Web.Controllers
             await _db.SaveChangesAsync();
 
             TempData["Success"] = "Category updated successfully.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { page });
         }
         
         [HttpPost]
@@ -74,7 +97,7 @@ namespace ProductHub.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, int page = 1)
         {
             var category =  await _db.Categories.FindAsync(id);
             if(category == null) return NotFound();
@@ -88,7 +111,7 @@ namespace ProductHub.Web.Controllers
             await _db.SaveChangesAsync();
 
             TempData["Success"] = "Category deleted.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { page });
         }
     }
 }

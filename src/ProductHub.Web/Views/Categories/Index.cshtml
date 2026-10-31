@@ -8,7 +8,7 @@
 <h1 class="h3">Categories</h1>
 
 <form asp-action="@(formtype == "Create" ? "Create" : "Edit")" asp-route-id="@(categoryData?.id)" method="post" class="row g-2 mb-4">
-    <div class="col-8">
+    <div class="col-6">
         <input name ="Name" value="@(categoryData?.name ?? "")" class="form-control" placeholder="New category" maxlength="100"  />
         <span class="text-danger">
             @Html.ValidationMessage("name")
@@ -29,7 +29,7 @@
         <table class="table table-striped align-middle">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th style="width:50%" >Name</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -38,9 +38,9 @@
                 {
                     <tr>
                         <td>@c.name</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@c.id" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <form onsubmit="return confirm(' Are you sure ? You want to delete?? ');" asp-action="Delete" asp-route-id="@c.id" method="post">
+                        <td class="d-flex gap-3">
+                            <a asp-action="Edit" asp-route-page="@ViewBag.CurrentPage" asp-route-id="@c.id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form onsubmit="return confirm(' Are you sure ? You want to delete?? ');" asp-route-page="@ViewBag.CurrentPage" asp-action="Delete" asp-route-id="@c.id" method="post">
                                 <button type="submit" class="btn btn-sm btn-outline-primary" >Delete</button>
                             </form>
                         </td>
@@ -48,5 +48,42 @@
                 }
             </tbody>
         </table>
+        @if (ViewBag.TotalPage > 1)
+        {
+            <nav>
+                <ul class="pagination" >
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(ViewBag.CurrentPage - 1)" >
+                                Previous
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= ViewBag.TotalPage; i++ )
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "") ">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(i)">
+                                @(i)
+                            </a>
+                        </li>
+                    }
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(ViewBag.CurrentPage + 1)">
+                                Next
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
     }
 </div>
