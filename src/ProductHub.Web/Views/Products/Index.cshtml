@@ -31,9 +31,9 @@ else
                         <td>@p.category.name</td>
                         <td>@p.price</td>
                         <td>@p.stock</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@p.id" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <form onsubmit="return confirm(' Are you sure ? You want to delete?? ');"  asp-action="Delete" asp-route-id="@p.id" method="post">
+                        <td class="d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@p.id" asp-route-page="@ViewBag.CurrentPage" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form onsubmit="return confirm(' Are you sure ? You want to delete?? ');" asp-route-page="@ViewBag.CurrentPage" asp-action="Delete" asp-route-id="@p.id" method="post">
                                 <button  class="btn btn-sm btn-outline-primary">Delete</button>
                             </form>
                         </td>
@@ -41,6 +41,7 @@ else
                 }
             </tbody>
     </table>
+    <partial name="_PaginationPartial" />
 }
 
 </div>

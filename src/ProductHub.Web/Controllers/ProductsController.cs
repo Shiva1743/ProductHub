@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProductHub.Web.Data;
@@ -6,6 +7,7 @@ using ProductHub.Web.Models;
 
 namespace ProductHub.Web.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly AppDbContext _db;
@@ -24,9 +26,20 @@ namespace ProductHub.Web.Controllers
                 );
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
+            int pageSize = 5;
+            int totalProd = await _db.Products.CountAsync();
+            int totalPage = (int)Math.Ceiling(totalProd / (double)pageSize);
+
+            page = totalPage > 1 ? Math.Min(page,totalPage) : 1;
+
+            ViewBag.CurrentPage = page;
+            ViewBag.totalPage = totalPage;
+
             var product_list = await _db.Products
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .Include(p => p.category)
                     .OrderBy(p=> p.name)
                     .ToListAsync();
@@ -78,7 +91,7 @@ namespace ProductHub.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, int page = 1)
         {
             var prod = await _db.Products.FindAsync(id);
             if (prod != null)
@@ -87,7 +100,7 @@ namespace ProductHub.Web.Controllers
                 await _db.SaveChangesAsync();
                 TempData["Success"] = "Product deleted.";
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index),new {page});
         }
 
 
