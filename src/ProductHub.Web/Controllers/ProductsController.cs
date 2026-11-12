@@ -90,6 +90,47 @@ namespace ProductHub.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, int page = 1)
+        {
+            var prod = await _db.Products.FindAsync(id);
+            if(prod == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction(nameof(Index), new { page });
+            }
+            LoadCategories(prod.categoryId);
+
+            return View(nameof(Create),prod);
+            //return RedirectToAction(nameof(Create),new {id=prod.id,page});
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, [Bind("name,description,price,stock,categoryId")] Product product,int page = 1)
+        {
+            var existing = await _db.Products.FindAsync(id);
+            if(existing == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction(nameof(Index), new { page });
+            }
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction(nameof(Index), new { page });
+            }
+            existing.name = product.name;
+            existing.description =  product.description;
+            existing.price = product.price;
+            existing.stock = product.stock;
+            existing.categoryId = product.categoryId;
+            existing.lastUpdatedAtUtc = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Product updated successfully.";
+            return RedirectToAction(nameof(Index),new {page});
+        }
+
         [HttpPost]
         public async Task<IActionResult> Delete(int id, int page = 1)
         {

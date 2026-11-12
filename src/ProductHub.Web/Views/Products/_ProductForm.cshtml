@@ -20,7 +20,7 @@
         </div>
         <div class="col-md-4 mb-3">
             <label asp-for="stock" class="form-label"></label>
-            <input asp-for="stock" type="number" class="form-control" />
+            <input asp-for="stock" type="number" min="1" class="form-control" />
             <span asp-validation-for="stock" class="text-danger"></span>
         </div>
         <div class="col-md-4 mb-3">

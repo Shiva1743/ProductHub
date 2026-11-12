@@ -34,6 +34,27 @@ namespace ProductHub.Web.Controllers
             ViewBag.TotalPage = totalPage;
             return View(category_list);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([Bind("name")]Category category)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Category name is required (max 100 characters).";
+                return RedirectToAction(nameof(Index));
+            }
+            var cname = category.name.Trim();
+            if (await _db.Categories.AnyAsync(c => c.name == cname))
+            {
+                TempData["Error"] = "Category already Exists.";
+                return RedirectToAction(nameof(Index));
+            }
+            _db.Categories.Add(category);
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Category added.";
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<IActionResult> Edit(int id, int page = 1)
         {
             int pageSize = 5;
@@ -74,26 +95,6 @@ namespace ProductHub.Web.Controllers
 
             TempData["Success"] = "Category updated successfully.";
             return RedirectToAction(nameof(Index), new { page });
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> Create([Bind("name")]Category category)
-        {
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = "Category name is required (max 100 characters).";
-                return RedirectToAction(nameof(Index));
-            }
-            var cname = category.name.Trim();
-            if (await _db.Categories.AnyAsync(c => c.name == cname))
-            {
-                TempData["Error"] = "Category already Exists.";
-                return RedirectToAction(nameof(Index));
-            }
-            _db.Categories.Add(category);
-            await _db.SaveChangesAsync();
-            TempData["Success"] = "Category added.";
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

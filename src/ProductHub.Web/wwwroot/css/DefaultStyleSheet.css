@@ -1,0 +1,10 @@
+﻿/*.alert{
+    animation : fadeOut 0.5s ease 5s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}*/
