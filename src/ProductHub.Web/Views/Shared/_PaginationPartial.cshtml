@@ -7,7 +7,8 @@
                 <li class="page-item">
                     <a class="page-link"
                        asp-action="Index"
-                       asp-route-page="@(ViewBag.CurrentPage - 1)">
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.categoryId" >
                         Previous
                     </a>
                 </li>
@@ -17,7 +18,7 @@
                 <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "") ">
                     <a class="page-link"
                        asp-action="Index"
-                       asp-route-page="@(i)">
+                       asp-route-page="@(i)" asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.categoryId">
                         @(i)
                     </a>
                 </li>
@@ -27,7 +28,8 @@
                 <li class="page-item">
                     <a class="page-link"
                        asp-action="Index"
-                       asp-route-page="@(ViewBag.CurrentPage + 1)">
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@ViewBag.Search" asp-route-categoryId="@ViewBag.categoryId">
                         Next
                     </a>
                 </li>

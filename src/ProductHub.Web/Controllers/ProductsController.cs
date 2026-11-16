@@ -26,23 +26,45 @@ namespace ProductHub.Web.Controllers
                 );
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(string? search,int? categoryId,int page = 1)
         {
             int pageSize = 5;
-            int totalProd = await _db.Products.CountAsync();
+            var query = _db.Products.Include(p => p.category).AsQueryable();
+
+            if (!String.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim();
+                if (s.Length > 0)
+                {
+                    query = query.Where(p => p.name.Contains(search) || (p.description != null && p.description.Contains(search)));
+                }
+            }
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.categoryId == categoryId.Value);  
+            }
+            int totalProd = await query.CountAsync();
             int totalPage = (int)Math.Ceiling(totalProd / (double)pageSize);
 
-            page = totalPage > 1 ? Math.Min(page,totalPage) : 1;
+            page = totalPage > 1 ? Math.Min(page, totalPage) : 1;
+
+            var product_list = await query.Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .OrderBy(p => p.name)
+                    .ToListAsync();
+
+            //var product_list = await _db.Products
+            //        .Skip((page - 1) * pageSize)
+            //        .Take(pageSize)
+            //        .Include(p => p.category)
+            //        .OrderBy(p=> p.name)
+            //        .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.totalPage = totalPage;
-
-            var product_list = await _db.Products
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Include(p => p.category)
-                    .OrderBy(p=> p.name)
-                    .ToListAsync();
+            ViewBag.Search = search;
+            ViewBag.categoryId = categoryId;
+            LoadCategories(categoryId);
             return View(product_list);
         }
 

@@ -1,8 +1,136 @@
-﻿@{
+﻿@model DashboardViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+@* <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div> *@
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <a class="btn btn-primary" asp-controller="Products" asp-action="Create">+ New Product</a>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Products</div>
+                <div class="fs-2 fw-bold">@Model.TotalProducts</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Categories</div>
+                <div class="fs-2 fw-bold">@Model.TotalCategories</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Stock Units</div>
+                <div class="fs-2 fw-bold">@Model.TotalStockUnits</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Inventory Value</div>
+                <div class="fs-2 fw-bold">@Model.InventoryValue.ToString("C0", new System.Globalization.CultureInfo("en-IN"))</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="alert alert-warning mb-0 d-flex justify-content-between">
+            <span>Low stock (≤ 5)</span>
+            <strong>@Model.LowStockCount</strong>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="alert alert-danger mb-0 d-flex justify-content-between">
+            <span>Out of stock</span>
+            <strong>@Model.OutOfStockCount</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Category wise -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Products by Category</div>
+            <div class="card-body">
+                @if(!Model.CategoryStats.Any())
+                {
+                    <p class="text-muted mb-0">No data.</p>
+                }
+                @foreach (var c in Model.CategoryStats)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small">
+                            <span>@c.Name</span>
+                            <span>@c.Count</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            @* <div class="progress-bar" style="width:@(c.Count * 100 / maxCount)%"></div> *@
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Low stock -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Low Stock Products</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var p in Model.LowStockProducts)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@p.name <small class="text-muted">(@p.category?.name)</small></span>
+                        <span class="badge @(p.stock == 0 ? "bg-danger" : "bg-warning text-dark")">@p.stock</span>
+                    </li>
+                }
+                @if (!Model.LowStockProducts.Any())
+                {
+                    <li class="list-group-item text-muted">All good 👍</li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Recent -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Recently Added</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var p in Model.RecentProducts)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@p.name</span>
+                        <small class="text-muted">@p.createdAtUtc.ToLocalTime().ToString("dd MMM")</small>
+                    </li>
+                }
+                @if (!Model.RecentProducts.Any())
+                {
+                    <li class="list-group-item text-muted">No products yet.</li>
+                }
+            </ul>
+            <div class="card-footer bg-white text-end">
+                <a asp-controller="Products" asp-action="Index">View all →</a>
+            </div>
+        </div>
+    </div>
 </div>
